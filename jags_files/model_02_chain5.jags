@@ -1,0 +1,64 @@
+ model {
+	diffcoef[1] = -0.5
+	diffcoef[2] =  0.5
+	
+	alphamid ~ dgamma(2, 0.5)
+	alphadiff ~ dnorm(0, pow(0.5,-2))
+
+	betamid ~ dbeta(2,2)
+	betadiff ~ dnorm(0, pow(0.125,-2))      
+
+	taumid ~ dgamma(2, 0.4)
+	taudiff ~ dnorm(0, pow(0.15,-2))	  
+
+	for (c in 1:nConditions) {
+		deltamid[c]  ~ dnorm(0, pow(2.5,-2))
+		deltadiff[c] ~ dnorm(0, pow(1.5,-2))
+	}
+
+	######### Subj Level
+	for (s in 1:nSubjects) {
+		tausubj[s] ~ dnorm(taugroup[groupList[s]], 1/taugroupsd[groupList[s]]^2)T(0.0001,)
+
+		for (c in 1:nConditions) {
+			deltasubj[s,c,1] ~ dnorm(deltagroup[groupList[s], c], 1/deltagroupcondsd[groupList[s]]^2)
+			deltasubj[s,c,2] = 0
+		}
+	}
+
+	######### Group Level
+	for (g in 1:2) {
+
+		# Group SDs
+		deltagroupcondsd[g] ~ dexp(2)T(0.0001,)
+		taugroupsd[g] ~ dexp(3)T(0.0001,)
+
+		alphagroup[g] = max(0.0001, alphamid + diffcoef[g] * alphadiff)
+		betagroup[g]  = min(0.9999, max(0.0001, betamid  + diffcoef[g] * betadiff))
+		taugroup[g]   = max(0.0001, taumid   + diffcoef[g] * taudiff)
+
+		# Condition 2 is guessing
+		for (c in 1:nConditions) {
+			deltagroup[g,c] = deltamid[c] + diffcoef[g] * deltadiff[c]
+		}
+	}
+
+	############### Run diffusion model
+	for (s in 1:nSubjects) {
+		for (tr in 1:nAllTrials) {
+			y[s,tr] ~ dwiener(alphagroup[groupList[s]], tausubj[s], betagroup[groupList[s]],deltasubj[s,condList[s,tr], z[s,tr]+1])
+			ypred[s,tr] ~ dwiener(alphagroup[groupList[s]], tausubj[s], betagroup[groupList[s]],deltasubj[s,condList[s,tr],z[s,tr]+1])
+			z[s,tr] ~ dbern(phi[s]) # guessing or not
+		}
+		phi[s] ~ dunif(0,1) # random proportion fed into guessing variable, updated based on their trial responses, fed into z
+	}
+
+	for (g in 1:2) {
+		tausubjrep[g] = 0
+		alphasubjrep[g] = 0
+		betasubjrep[g] = 0
+		for (c in 1:nConditions) {
+			deltasubjrep[g,c] = 0
+		}
+	}
+}

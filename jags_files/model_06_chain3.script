@@ -1,0 +1,62 @@
+load dic
+load wiener
+model in "model_06_chain3.jags"
+data in "model_06_chain3.data"
+compile, nchains(1)
+parameters in "model_06_chain3.init"
+parameters in "model_06_chain3.seed"
+initialize
+update 150000
+monitor set alphamid, thin(1)
+monitor set alphadiff, thin(1)
+monitor set betamid, thin(1)
+monitor set betadiff, thin(1)
+monitor set taumid, thin(1)
+monitor set taudiff, thin(1)
+monitor set deltamid, thin(1)
+monitor set deltadiff, thin(1)
+monitor set alphagroup, thin(1)
+monitor set betagroup, thin(1)
+monitor set taugroup, thin(1)
+monitor set deltagroup, thin(1)
+monitor set ypred, thin(1)
+monitor set z, thin(1)
+monitor set phi, thin(1)
+monitor set tausubjrep, thin(1)
+monitor set alphasubjrep, thin(1)
+monitor set betasubjrep, thin(1)
+monitor set deltasubjrep, thin(1)
+monitor set deltasubj, thin(1)
+monitor set deltagroupcondsd, thin(1)
+monitor set tausubj, thin(1)
+monitor set taugroupsd, thin(1)
+monitor set betasubj, thin(1)
+monitor set betagroupsd, thin(1)
+monitor set alphasubj, thin(1)
+monitor set alphagroupsd, thin(1)
+monitor set tausubjsd, thin(1)
+monitor set tausubjtrial, thin(1)
+monitor set betasubjsd, thin(1)
+monitor set betasubjtrial, thin(1)
+monitor deviance
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+update 7000
+coda *, stem('model_06_chain3_')
